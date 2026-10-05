@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+int main() {
+    pid_t pid1, pid2;
+
+    printf("Parent Process [PID: %d]\n", getpid());
+
+    // Create First Child Process
+    pid1 = fork();
+
+    if (pid1 < 0) {
+        perror("Failed to fork first child");
+        return 1;
+    } 
+    else if (pid1 == 0) {
+        // Code executed by First Child
+        printf("  Child 1 [PID: %d, Parent PID: %d]\n", getpid(), getppid());
+        exit(0);
+    }
+
+    // Create Second Child Process (executed only by the parent)
+    pid2 = fork();
+
+    if (pid2 < 0) {
+        perror("Failed to fork second child");
+        return 1;
+    } 
+    else if (pid2 == 0) {
+        // Code executed by Second Child
+        printf("  Child 2 [PID: %d, Parent PID: %d]\n", getpid(), getppid());
+        exit(0);
+    }
+
+    // Parent waits for both children to prevent zombie processes
+    wait(NULL);
+    wait(NULL);
+
+    printf("Parent Process finished executing.\n");
+    return 0;
+}
+gcc -Wall process_tree.c -o process_tree
+

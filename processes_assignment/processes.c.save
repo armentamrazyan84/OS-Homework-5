@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+int main() {
+    pid_t pid1, pid2;
+
+    printf("Parent Process [PID: %d] starting...\n", getpid());
+
+    // Create First Child Process
+    pid1 = fork();
+
+    if (pid1 < 0) {
+        perror("Failed to fork Child 1");
+        exit(EXIT_FAILURE);
+    } 
+    else if (pid1 == 0) {
+        // Code executed by Child 1
+        printf(" -> Child 1 [PID: %d] (Parent PID: %d) is running.\n", getpid(), getppid());
+        sleep(1);
+        printf(" -> Child 1 [PID: %d] exiting.\n", getpid());
+        exit(EXIT_SUCCESS);
+    }
+
+    // Create Second Child Process (executed ONLY by the Parent)
+    pid2 = fork();
+
+    if (pid2 < 0) {
+        perror("Failed to fork Child 2");
+        exit(EXIT_FAILURE);
+    } 
+    else if (pid2 == 0) {
+        // Code executed by Child 2
+        printf(" -> Child 2 [PID: %d] (Parent PID: %d) is running.\n", getpid(), getppid());
+        sleep(1);
+        printf(" -> Child 2 [PID: %d] exiting.\n", getpid());
+        exit(EXIT_SUCCESS);
+    }
+
+    // Parent Process waits for both children to finish to prevent zombie processes
+    wait(NULL);
+    wait(NULL);
+
+    printf("Parent Process [PID: %d] detected both children completed. Exiting.\n", getpid());
+
+    return 0;
+}
+
